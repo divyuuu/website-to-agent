@@ -1,9 +1,10 @@
 # Phase 0 — Foundation & Guardrails
 
-Status: NOT_STARTED
-Branch: TBD
-PR: TBD
+Status: DONE
+Branch: chore/phase-0-foundation
+PR: TBD (link after merge)
 Author: divyuuu
+Completed: 2026-10-29
 
 ## Objective
 
@@ -32,10 +33,10 @@ Without this, later phases drift (duplicate schemas, secrets in git, broken setu
 
 ## Deliverables
 
-- [ ] `pnpm install`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm dev` all pass
-- [ ] SQLite migration runs: creates `tenants`, `website_connections`, `workflows`, `workflow_versions`, `execution_runs`, `audit_events`
-- [ ] No `*.db` committed, no secrets in logs
-- [ ] README shows divyuuu only
+- [x] `pnpm install`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm dev` all pass
+- [x] SQLite migration runs: creates `tenants`, `website_connections`, `workflows`, `workflow_versions`, `execution_runs`, `audit_events`
+- [x] No `*.db` committed, no secrets in logs
+- [x] README shows divyuuu only
 
 ## Exit criteria (must all be true)
 
@@ -53,3 +54,16 @@ Without this, later phases drift (duplicate schemas, secrets in git, broken setu
 
 - Set Status DONE, add dates, PR link, test output summary.
 - Update `00-overview.md` table.
+
+## Evidence (2026-10-29, Windows, Node v24.18.0, pnpm 12.8.2)
+
+- `pnpm install` exit 0
+- `pnpm lint` exit 0
+- `pnpm typecheck` exit 0
+- `pnpm test` exit 0 (3 files, 4 tests passed)
+- `pnpm db:migrate` exit 0 (Migrated SQLite database at ./data/app.db)
+- `GET /health` -> {"ok":true,"service":"website-to-agent-api"}
+- `GET /ready` -> {"ok":true}
+- Attribution grep for Muse/OpenCode/LLM/Generated-by: no matches
+- LICENSE: MIT (c) divyuuu (default, change on request)
+- Rollback: revert merge commit of this phase PR

@@ -1,0 +1,27 @@
+{
+  "name": "website-to-agent",
+  "version": "0.1.0",
+  "private": true,
+  "author": "divyuuu",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "pnpm --filter ./apps/api dev",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "db:migrate": "tsx packages/database/scripts/migrate.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.18.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^3.0.0"
+  }
+}

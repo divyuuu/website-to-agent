@@ -1,0 +1,15 @@
+{
+  "name": "@website-to-agent/api",
+  "version": "0.1.0",
+  "author": "divyuuu",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@website-to-agent/config": "workspace:*",
+    "fastify": "^5.2.0"
+  }
+}
