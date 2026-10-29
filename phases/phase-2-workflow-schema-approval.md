@@ -1,9 +1,10 @@
 # Phase 2 — Workflow Schema + Approval
 
-Status: NOT_STARTED
-Branch: TBD
-PR: TBD
+Status: DONE
+Branch: feat/phase-2-workflow
+PR: TBD (link after merge)
 Author: divyuuu
+Completed: 2026-10-30
 
 ## Objective
 
@@ -42,4 +43,12 @@ Example tool in scope: `search_students`, `get_latest_test_results` (read-only).
 
 ## Memory update on completion
 
-- Status DONE + schema version + sample approved workflow id.
+- Status DONE + test evidence.
+
+## Evidence (2026-10-30)
+
+- `pnpm lint` 0, `pnpm typecheck` 0, `pnpm test` 0 (8 files, 17 tests)
+- Schema rejects: unknown step, empty locator, absolute URL, unknown input ref, non-read-only risk
+- API flow verified: create -> direct approve 409 -> bad propose 400 -> propose 200 -> approve 200, cross-tenant 404, tenant B list empty
+- Tenant scoping via x-tenant-id (temporary until Phase 5 credentials)
+- Rollback: revert merge commit of this phase PR
