@@ -22,7 +22,7 @@ Workflow: branch -> commit -> PR -> merge to `main`. No direct pushes to `main`.
 |-------|------|------|--------|
 | 0 | Foundation & Guardrails | Clean repo, TS monorepo, lint/test, SQLite, README/LICENSE as divyuuu | DONE |
 | 1 | Fixture Site + Inspection | Local demo site + Playwright inspection JSON | DONE |
-| 2 | Workflow Schema + Approval | Declarative schema, validation, approve/reject | NOT_STARTED |
+| 2 | Workflow Schema + Approval | Declarative schema, validation, approve/reject | DONE |
 | 3 | Execution Engine | Run approved read-only workflow + verify outcome | NOT_STARTED |
 | 4 | MCP Server | Expose 1-2 tools via MCP, call from real MCP client | NOT_STARTED |
 | 5 | Auth + Tenant Isolation + Audit | Multi-tenant isolation, credentials, audit log | NOT_STARTED |
@@ -40,7 +40,8 @@ Workflow: branch -> commit -> PR -> merge to `main`. No direct pushes to `main`.
 
 - Phase 0 DONE on branch `chore/phase-0-foundation` (2026-10-29). Evidence: pnpm lint/typecheck/test/db:migrate all exit 0, /health + /ready return ok.
 - Phase 1 DONE on branch `feat/phase-1-fixture` (2026-10-30). Evidence: 5 files/7 tests green, live CLI inspection verified with redaction.
-- Next: Phase 2 Workflow Schema + Approval.
+- Phase 2 DONE on branch `feat/phase-2-workflow` (2026-10-30). Evidence: 8 files/17 tests green, approval flow + cross-tenant isolation verified.
+- Next: Phase 3 Execution Engine.
 
 ## Rollback rule
 

@@ -41,9 +41,18 @@ importers:
       '@website-to-agent/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@website-to-agent/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@website-to-agent/workflow-engine':
+        specifier: workspace:*
+        version: link:../../packages/workflow-engine
       fastify:
         specifier: ^5.2.0
         version: 5.12.7
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
 
   packages/config: {}
 
@@ -70,6 +79,12 @@ importers:
       fastify:
         specifier: ^5.2.0
         version: 5.12.7
+
+  packages/workflow-engine:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
 
 packages:
 
