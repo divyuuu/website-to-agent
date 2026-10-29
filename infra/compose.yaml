@@ -1,0 +1,10 @@
+services:
+  api:
+    build: ../..
+    command: pnpm --filter ./apps/api start
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../data:/app/data

@@ -20,7 +20,7 @@ Workflow: branch -> commit -> PR -> merge to `main`. No direct pushes to `main`.
 
 | Phase | Name | Goal | Status |
 |-------|------|------|--------|
-| 0 | Foundation & Guardrails | Clean repo, TS monorepo, lint/test, SQLite, README/LICENSE as divyuuu | NOT_STARTED |
+| 0 | Foundation & Guardrails | Clean repo, TS monorepo, lint/test, SQLite, README/LICENSE as divyuuu | DONE |
 | 1 | Fixture Site + Inspection | Local demo site + Playwright inspection JSON | NOT_STARTED |
 | 2 | Workflow Schema + Approval | Declarative schema, validation, approve/reject | NOT_STARTED |
 | 3 | Execution Engine | Run approved read-only workflow + verify outcome | NOT_STARTED |
@@ -38,8 +38,8 @@ Workflow: branch -> commit -> PR -> merge to `main`. No direct pushes to `main`.
 
 ## Current position
 
-- Today: project start. On branch `chore/phases-memory` to create this memory.
-- Next: Phase 0 after owner confirms this plan.
+- Phase 0 DONE on branch `chore/phase-0-foundation` (2026-10-29). Evidence: pnpm lint/typecheck/test/db:migrate all exit 0, /health + /ready return ok.
+- Next: Phase 1 Fixture Site + Inspection.
 
 ## Rollback rule
 
