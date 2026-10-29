@@ -1,0 +1,12 @@
+{
+  "name": "@website-to-agent/auth",
+  "version": "0.1.0",
+  "author": "divyuuu",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "devDependencies": {
+    "@website-to-agent/database": "workspace:*"
+  }
+}

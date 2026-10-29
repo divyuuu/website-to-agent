@@ -1,15 +1,20 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import { runWorkflow } from "@website-to-agent/workflow-engine/runner.js";
+import { canPerform, type AuthContext } from "@website-to-agent/auth";
+import { redactError } from "@website-to-agent/secrets";
 
-function tenantIdFrom(req: { headers: Record<string, unknown> }): string {
-  return String(req.headers["x-tenant-id"] ?? "").trim();
+function authOf(req: FastifyRequest): AuthContext {
+  return (req as unknown as { auth: AuthContext }).auth;
 }
 
 export function registerExecutionRoutes(app: FastifyInstance, db: DatabaseSync): void {
   app.post("/executions", async (req, reply) => {
-    const tenantId = tenantIdFrom(req);
+    if (!canPerform(authOf(req).role, "operator")) {
+      return reply.code(403).send({ ok: false, error: "forbidden" });
+    }
+    const tenantId = authOf(req).tenantId;
     const body = req.body as {
       workflowId?: string;
       inputs?: Record<string, string>;
@@ -88,13 +93,13 @@ export function registerExecutionRoutes(app: FastifyInstance, db: DatabaseSync):
       executionId,
       status: result.status,
       extracted: result.extracted,
-      error: result.error,
+      error: result.error ? redactError(result.error) : undefined,
       durationMs: result.durationMs,
     });
   });
 
   app.get("/executions/:id", async (req, reply) => {
-    const tenantId = tenantIdFrom(req);
+    const tenantId = authOf(req).tenantId;
     const { id } = req.params as { id: string };
     const row = db
       .prepare(

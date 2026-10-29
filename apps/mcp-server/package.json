@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
+    "@website-to-agent/auth": "workspace:*",
     "@website-to-agent/config": "workspace:*",
     "@website-to-agent/database": "workspace:*",
     "@website-to-agent/tool-registry": "workspace:*",

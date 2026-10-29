@@ -13,13 +13,15 @@ import {
   buildInputShape,
 } from "@website-to-agent/tool-registry";
 import { runWorkflow } from "@website-to-agent/workflow-engine/runner.js";
+import { resolveKey } from "@website-to-agent/auth";
 
-function tenantIdFrom(req: { headers: Record<string, unknown> }): string | null {
-  const raw = req.headers["x-tenant-id"];
-  if (typeof raw !== "string") return null;
-  const id = raw.trim();
-  if (!id || id.length > 64) return null;
-  return id;
+function tenantIdFrom(
+  db: ReturnType<typeof openDatabase>,
+  req: { headers: Record<string, unknown> }
+): string | null {
+  const raw = req.headers["x-mcp-key"];
+  if (typeof raw !== "string" || !raw) return null;
+  return resolveKey(db, raw.trim())?.tenantId ?? null;
 }
 
 export function buildMcpServer(dbPath?: string) {
@@ -39,10 +41,10 @@ export function buildMcpServer(dbPath?: string) {
     rawRes: import("node:http").ServerResponse,
     hijack: () => void
   ) => {
-    const tenantId = tenantIdFrom(req);
+    const tenantId = tenantIdFrom(db, req);
     if (!tenantId) {
       rawRes.writeHead(401, { "content-type": "application/json" });
-      rawRes.end(JSON.stringify({ ok: false, error: "missing x-tenant-id" }));
+      rawRes.end(JSON.stringify({ ok: false, error: "unauthorized" }));
       return;
     }
     hijack();
