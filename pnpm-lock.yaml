@@ -47,6 +47,12 @@ importers:
       '@website-to-agent/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@website-to-agent/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
+      '@website-to-agent/rate-limit':
+        specifier: workspace:*
+        version: link:../../packages/rate-limit
       '@website-to-agent/secrets':
         specifier: workspace:*
         version: link:../../packages/secrets
@@ -78,6 +84,12 @@ importers:
       '@website-to-agent/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@website-to-agent/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
+      '@website-to-agent/rate-limit':
+        specifier: workspace:*
+        version: link:../../packages/rate-limit
       '@website-to-agent/tool-registry':
         specifier: workspace:*
         version: link:../../packages/tool-registry
@@ -120,6 +132,14 @@ importers:
       '@website-to-agent/fixture-site':
         specifier: workspace:*
         version: link:../test-fixtures/site
+
+  packages/observability:
+    dependencies:
+      '@website-to-agent/secrets':
+        specifier: workspace:*
+        version: link:../secrets
+
+  packages/rate-limit: {}
 
   packages/secrets: {}
 

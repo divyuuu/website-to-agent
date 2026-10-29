@@ -8,6 +8,7 @@ import {
 import { registerWorkflowRoutes } from "./workflows.js";
 import { registerExecutionRoutes } from "./executions.js";
 import { registerKeyRoutes } from "./keys.js";
+import { registerMetricsRoutes } from "./metrics.js";
 import { redactText } from "@website-to-agent/secrets";
 
 export function buildServer(dbPath?: string) {
@@ -28,6 +29,7 @@ export function buildServer(dbPath?: string) {
   registerWorkflowRoutes(server, db);
   registerExecutionRoutes(server, db);
   registerKeyRoutes(server, db);
+  registerMetricsRoutes(server, db);
   server.setErrorHandler((error, _req, reply) => {
     const status = (error as { statusCode?: number }).statusCode ?? 500;
     const message = error instanceof Error ? error.message : "unknown error";

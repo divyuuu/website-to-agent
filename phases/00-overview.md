@@ -26,7 +26,7 @@ Workflow: branch -> commit -> PR -> merge to `main`. No direct pushes to `main`.
 | 3 | Execution Engine | Run approved read-only workflow + verify outcome | DONE |
 | 4 | MCP Server | Expose 1-2 tools via MCP, call from real MCP client | DONE |
 | 5 | Auth + Tenant Isolation + Audit | Multi-tenant isolation, credentials, audit log | DONE |
-| 6 | Hardening + Pilot Ready | Rate limits, redaction, E2E/regression, runbook | NOT_STARTED |
+| 6 | Hardening + Pilot Ready | Rate limits, redaction, E2E/regression, runbook | DONE |
 
 ## How to update this memory
 
@@ -44,7 +44,8 @@ Workflow: branch -> commit -> PR -> merge to `main`. No direct pushes to `main`.
 - Phase 3 DONE on branch `feat/phase-3-execution` (2026-10-30). Evidence: 10 files/22 tests green, verified extraction + idempotency.
 - Phase 4 DONE on branch `feat/phase-4-mcp` (2026-10-30). Evidence: 12 files/27 tests green, real MCP Client list+call verified.
 - Phase 5 DONE on branch `feat/phase-5-auth` (2026-10-30). Evidence: 15 files/33 tests green, keys/roles/revocation/isolation verified.
-- Next: Phase 6 Hardening + Pilot Ready.
+- Phase 6 DONE on branch `feat/phase-6-hardening` (2026-10-30). Evidence: 19 files/41 tests green, kill switch + limits + metrics + runbook.
+- Pilot ready. Tag `v0.1.0` after merge. See phase-6 file for known limitations.
 
 ## Rollback rule
 

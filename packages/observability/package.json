@@ -1,0 +1,12 @@
+{
+  "name": "@website-to-agent/observability",
+  "version": "0.1.0",
+  "author": "divyuuu",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@website-to-agent/secrets": "workspace:*"
+  }
+}

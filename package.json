@@ -11,6 +11,7 @@
     "mcp:dev": "pnpm --filter @website-to-agent/mcp-server dev",
     "fixture:dev": "pnpm --filter @website-to-agent/fixture-site dev",
     "inspect": "pnpm --filter @website-to-agent/inspection inspect",
+    "retention": "tsx packages/database/scripts/retention.ts",
     "test": "vitest run",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",

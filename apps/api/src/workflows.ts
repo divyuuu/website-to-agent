@@ -11,6 +11,7 @@ import {
   canPerform,
   type AuthContext,
 } from "@website-to-agent/auth";
+import { logEvent, countEvent } from "@website-to-agent/observability";
 
 function authOf(req: FastifyRequest): AuthContext {
   return (req as unknown as { auth: AuthContext }).auth;
@@ -38,11 +39,14 @@ export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): 
       !req.url.startsWith("/workflows") &&
       !req.url.startsWith("/connections") &&
       !req.url.startsWith("/executions") &&
-      !req.url.startsWith("/mcp-keys")
+      !req.url.startsWith("/mcp-keys") &&
+      !req.url.startsWith("/metrics")
     )
       return;
     const auth = resolveAuth(db, req.headers as Record<string, unknown>);
     if (!auth) {
+      countEvent("auth.failure", "global");
+      logEvent("auth.failure", { url: req.url });
       reply.code(401).send({ ok: false, error: "unauthorized" });
       return;
     }
@@ -170,6 +174,40 @@ export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): 
     }
     db.prepare("UPDATE workflows SET status = 'rejected' WHERE id = ?").run(id);
     return reply.send({ ok: true, status: "rejected" });
+  });
+
+  app.post("/connections/:id/disable", async (req, reply) => {
+    if (!canPerform(authOf(req).role, "owner")) {
+      return reply.code(403).send({ ok: false, error: "forbidden" });
+    }
+    const tenantId = authOf(req).tenantId;
+    const { id } = req.params as { id: string };
+    const row = db
+      .prepare("SELECT id FROM website_connections WHERE id = ? AND tenant_id = ?")
+      .get(id, tenantId) as { id: string } | undefined;
+    if (!row) return reply.code(404).send({ ok: false, error: "connection not found" });
+    db.prepare("UPDATE website_connections SET status = 'disabled' WHERE id = ?").run(id);
+    db.prepare(
+      "INSERT INTO audit_events (id, tenant_id, actor, action, target) VALUES (?, ?, ?, ?, ?)"
+    ).run(randomUUID(), tenantId, tenantId, "connection.disable", id);
+    return reply.send({ ok: true, status: "disabled" });
+  });
+
+  app.post("/workflows/:id/disable", async (req, reply) => {
+    if (!canPerform(authOf(req).role, "owner")) {
+      return reply.code(403).send({ ok: false, error: "forbidden" });
+    }
+    const tenantId = authOf(req).tenantId;
+    const { id } = req.params as { id: string };
+    const row = db
+      .prepare("SELECT id FROM workflows WHERE id = ? AND tenant_id = ?")
+      .get(id, tenantId) as { id: string } | undefined;
+    if (!row) return reply.code(404).send({ ok: false, error: "workflow not found" });
+    db.prepare("UPDATE workflows SET status = 'disabled' WHERE id = ?").run(id);
+    db.prepare(
+      "INSERT INTO audit_events (id, tenant_id, actor, action, target) VALUES (?, ?, ?, ?, ?)"
+    ).run(randomUUID(), tenantId, tenantId, "workflow.disable", id);
+    return reply.send({ ok: true, status: "disabled" });
   });
 
   app.get("/workflows", async (req) => {
