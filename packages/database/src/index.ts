@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { readFileSync, mkdirSync } from "node:fs";
+import { readFileSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,8 +18,13 @@ export function openDatabase(path: string): DatabaseSync {
 }
 
 export function runMigrations(db: DatabaseSync): void {
-  const sql = readFileSync(join(here, "..", "migrations", "001_init.sql"), "utf-8");
-  db.exec(sql);
+  const dir = join(here, "..", "migrations");
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith(".sql"))
+    .sort();
+  for (const f of files) {
+    db.exec(readFileSync(join(dir, f), "utf-8"));
+  }
 }
 
 export function countByTenant(

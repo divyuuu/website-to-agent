@@ -14,5 +14,8 @@
     "@website-to-agent/workflow-engine": "workspace:*",
     "fastify": "^5.2.0",
     "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@website-to-agent/fixture-site": "workspace:*"
   }
 }
