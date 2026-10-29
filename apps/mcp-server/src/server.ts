@@ -14,6 +14,10 @@ import {
 } from "@website-to-agent/tool-registry";
 import { runWorkflow } from "@website-to-agent/workflow-engine/runner.js";
 import { resolveKey } from "@website-to-agent/auth";
+import { limiterFromEnv } from "@website-to-agent/rate-limit";
+import { countEvent } from "@website-to-agent/observability";
+
+const toolLimiter = limiterFromEnv();
 
 function tenantIdFrom(
   db: ReturnType<typeof openDatabase>,
@@ -43,6 +47,7 @@ export function buildMcpServer(dbPath?: string) {
   ) => {
     const tenantId = tenantIdFrom(db, req);
     if (!tenantId) {
+      countEvent("auth.failure");
       rawRes.writeHead(401, { "content-type": "application/json" });
       rawRes.end(JSON.stringify({ ok: false, error: "unauthorized" }));
       return;
@@ -62,23 +67,32 @@ export function buildMcpServer(dbPath?: string) {
       const definition = resolved.definition;
       const baseUrl = resolved.baseUrl;
       server.tool(tool.name, tool.description, shape, async (args) => {
-        const inputs: Record<string, string> = {};
-        for (const [k, v] of Object.entries(args ?? {})) inputs[k] = String(v);
-        const executionId = randomUUID();
-        db.prepare(
-          "INSERT INTO execution_runs (id, tenant_id, workflow_version_id, status) VALUES (?, ?, ?, 'running')"
-        ).run(executionId, tenantId, versionId);
-        const result = await runWorkflow({
-          baseUrl,
-          definition: definition as never,
-          inputs,
-          timeoutMs: tool.timeoutMs,
-        });
-        db.prepare("UPDATE execution_runs SET status = ?, duration_ms = ? WHERE id = ?").run(
-          result.status,
-          result.durationMs,
-          executionId
-        );
+        const gate = toolLimiter.begin(`mcp:${tenantId}`);
+        if (!gate.allowed) {
+          countEvent("rate_limited", tenantId);
+          return {
+            content: [{ type: "text" as const, text: JSON.stringify({ status: "rate_limited", retryAfterSec: gate.retryAfterSec }) }],
+            isError: true,
+          };
+        }
+        try {
+          const inputs: Record<string, string> = {};
+          for (const [k, v] of Object.entries(args ?? {})) inputs[k] = String(v);
+          const executionId = randomUUID();
+          db.prepare(
+            "INSERT INTO execution_runs (id, tenant_id, workflow_version_id, status) VALUES (?, ?, ?, 'running')"
+          ).run(executionId, tenantId, versionId);
+          const result = await runWorkflow({
+            baseUrl,
+            definition: definition as never,
+            inputs,
+            timeoutMs: tool.timeoutMs,
+          });
+          db.prepare("UPDATE execution_runs SET status = ?, duration_ms = ? WHERE id = ?").run(
+            result.status,
+            result.durationMs,
+            executionId
+          );
         if (result.status === "succeeded") {
           return {
             content: [
@@ -98,6 +112,9 @@ export function buildMcpServer(dbPath?: string) {
           ],
           isError: true,
         };
+        } finally {
+          toolLimiter.end(`mcp:${tenantId}`);
+        }
       });
     }
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });

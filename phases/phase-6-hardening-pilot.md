@@ -1,9 +1,10 @@
 # Phase 6 — Hardening + Pilot Ready
 
-Status: NOT_STARTED
-Branch: TBD
-PR: TBD
+Status: DONE
+Branch: feat/phase-6-hardening
+PR: TBD (link after merge)
 Author: divyuuu
+Completed: 2026-10-30
 
 ## Objective
 
@@ -43,4 +44,22 @@ Differentiator is reliability + diagnosable failures, not feature count.
 
 ## Memory update on completion
 
-- Status DONE + tag + metrics snapshot + next real-site candidate (if any).
+- Status DONE + test evidence.
+
+## Evidence (2026-10-30)
+
+- `pnpm lint` 0, `pnpm typecheck` 0, `pnpm test` 0 (19 files, 41 tests), `pnpm db:migrate` 0
+- Kill switch: owner-only disable for connections/workflows, audited; executions fail closed (409); disabled workflows leave MCP listing
+- Rate limits: per-tenant 30/min + 2 concurrent (env-tunable), 429 + retry-after on API and MCP, covered by unit + API tests
+- Metrics: `GET /metrics` with by-status counts, p50/p95 durations, per-version breakdown, auth/rate counters
+- Retention: `pnpm retention` deletes old executions, keeps audit; policy in docs/runbook.md
+- Attribution grep: no matches; LICENSE/package authors divyuuu only
+
+## Known limitations (read before any real site)
+
+- Localhost fixture only. Real sites need per-site validation; CAPTCHA/MFA/anti-bot are unsupported and pause for human setup.
+- Fixture demo login is hardcoded for localhost; per-connection credential storage is the next step after pilot.
+- Workflows are authored via API; AI-assisted suggestion is future work, not in pilot.
+- SQLite + in-process execution, single region. No worker fleet yet.
+- MCP transport is Streamable HTTP, tested with the official SDK Client. Empty tenants surface SDK -32601 (no leak).
+- Rate/auth counters are per-process memory; DB stats are durable.

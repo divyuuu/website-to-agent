@@ -4,6 +4,10 @@ import type { DatabaseSync } from "node:sqlite";
 import { runWorkflow } from "@website-to-agent/workflow-engine/runner.js";
 import { canPerform, type AuthContext } from "@website-to-agent/auth";
 import { redactError } from "@website-to-agent/secrets";
+import { limiterFromEnv } from "@website-to-agent/rate-limit";
+import { logEvent, countEvent } from "@website-to-agent/observability";
+
+export const executionLimiter = limiterFromEnv();
 
 function authOf(req: FastifyRequest): AuthContext {
   return (req as unknown as { auth: AuthContext }).auth;
@@ -15,6 +19,13 @@ export function registerExecutionRoutes(app: FastifyInstance, db: DatabaseSync):
       return reply.code(403).send({ ok: false, error: "forbidden" });
     }
     const tenantId = authOf(req).tenantId;
+    const gate = executionLimiter.begin(`exec:${tenantId}`);
+    if (!gate.allowed) {
+      countEvent("rate_limited", tenantId);
+      logEvent("rate_limited", { tenantId, retryAfterSec: gate.retryAfterSec });
+      reply.header("retry-after", String(gate.retryAfterSec));
+      return reply.code(429).send({ ok: false, error: "rate_limited", retryAfterSec: gate.retryAfterSec });
+    }
     const body = req.body as {
       workflowId?: string;
       inputs?: Record<string, string>;
@@ -62,9 +73,13 @@ export function registerExecutionRoutes(app: FastifyInstance, db: DatabaseSync):
     }
 
     const conn = db
-      .prepare("SELECT base_url AS baseUrl FROM website_connections WHERE id = ? AND tenant_id = ?")
-      .get(wf.connectionId, tenantId) as { baseUrl: string } | undefined;
+      .prepare("SELECT base_url AS baseUrl, status FROM website_connections WHERE id = ? AND tenant_id = ?")
+      .get(wf.connectionId, tenantId) as { baseUrl: string; status: string } | undefined;
     if (!conn) return reply.code(404).send({ ok: false, error: "connection not found" });
+    if (conn.status === "disabled" || conn.status === "blocked") {
+      executionLimiter.end(`exec:${tenantId}`);
+      return reply.code(409).send({ ok: false, error: "connection_disabled" });
+    }
 
     const executionId = randomUUID();
     db.prepare(
@@ -72,12 +87,18 @@ export function registerExecutionRoutes(app: FastifyInstance, db: DatabaseSync):
     ).run(executionId, tenantId, ver.id, idem);
 
     const started = Date.now();
-    const result = await runWorkflow({
-      baseUrl: conn.baseUrl,
-      definition: JSON.parse(ver.definition),
-      inputs,
-      timeoutMs: 30000,
-    });
+    let result: Awaited<ReturnType<typeof runWorkflow>>;
+    try {
+      const timeoutMs = Math.max(1000, Number(process.env.EXEC_TIMEOUT_MS ?? "30000"));
+      result = await runWorkflow({
+        baseUrl: conn.baseUrl,
+        definition: JSON.parse(ver.definition),
+        inputs,
+        timeoutMs,
+      });
+    } finally {
+      executionLimiter.end(`exec:${tenantId}`);
+    }
 
     db.prepare("UPDATE execution_runs SET status = ?, duration_ms = ? WHERE id = ?").run(
       result.status,
@@ -87,6 +108,9 @@ export function registerExecutionRoutes(app: FastifyInstance, db: DatabaseSync):
     db.prepare(
       "INSERT INTO audit_events (id, tenant_id, actor, action, target) VALUES (?, ?, ?, ?, ?)"
     ).run(randomUUID(), tenantId, tenantId, "execution.run", executionId);
+    if (result.status === "succeeded") countEvent("execution.succeeded", tenantId);
+    else countEvent("execution.failed", tenantId);
+    logEvent("execution", { tenantId, status: result.status, durationMs: result.durationMs });
 
     return reply.send({
       ok: result.status === "succeeded",

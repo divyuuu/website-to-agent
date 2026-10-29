@@ -12,6 +12,8 @@
     "@modelcontextprotocol/sdk": "^1.12.0",
     "@website-to-agent/auth": "workspace:*",
     "@website-to-agent/config": "workspace:*",
+    "@website-to-agent/observability": "workspace:*",
+    "@website-to-agent/rate-limit": "workspace:*",
     "@website-to-agent/database": "workspace:*",
     "@website-to-agent/tool-registry": "workspace:*",
     "@website-to-agent/workflow-engine": "workspace:*",
