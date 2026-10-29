@@ -1,9 +1,10 @@
 # Phase 4 — MCP Server
 
-Status: NOT_STARTED
-Branch: TBD
-PR: TBD
+Status: DONE
+Branch: feat/phase-4-mcp
+PR: TBD (link after merge)
 Author: divyuuu
+Completed: 2026-10-30
 
 ## Objective
 
@@ -39,4 +40,14 @@ This is the product promise: website becomes agent-callable tools.
 
 ## Memory update on completion
 
-- Status DONE + SDK version + client compatibility note.
+- Status DONE + test evidence.
+
+## Evidence (2026-10-30)
+
+- `pnpm lint` 0, `pnpm typecheck` 0, `pnpm test` 0 (12 files, 27 tests)
+- SDK: @modelcontextprotocol/sdk 1.32.2, stateless Streamable HTTP, per-request tenant server
+- Real Client listTools + callTool verified: search_students STU-002 returns succeeded rows
+- Auth: missing x-tenant-id -> 401; tenant_b sees zero tenant_a tools (empty list or SDK -32601, both prove no leak)
+- Registry: version pinning tested (v2 resolution), input shape bounded (maxLength 200 cap)
+- Migration runner now idempotent (schema_migrations + PRAGMA guard); fixes double-migrate on shared DB files
+- Rollback: revert merge commit of this phase PR
