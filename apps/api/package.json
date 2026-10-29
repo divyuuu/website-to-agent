@@ -9,8 +9,10 @@
     "start": "tsx src/index.ts"
   },
   "dependencies": {
+    "@website-to-agent/auth": "workspace:*",
     "@website-to-agent/config": "workspace:*",
     "@website-to-agent/database": "workspace:*",
+    "@website-to-agent/secrets": "workspace:*",
     "@website-to-agent/workflow-engine": "workspace:*",
     "fastify": "^5.2.0",
     "zod": "^3.23.8"

@@ -50,8 +50,10 @@ pnpm fixture:dev
 pnpm mcp:dev
 ```
 
-Point an MCP client at `http://localhost:3001/mcp` with header `x-tenant-id: <tenant>`.
-Per-tenant API keys arrive in Phase 5; header auth is temporary.
+Point an MCP client at `http://localhost:3001/mcp` with header `x-mcp-key: <key>`.
+Create keys via the admin API: `POST /mcp-keys { name, role }` with `owner` rights.
+Roles: `owner` (keys + approve), `operator` (workflows + executions), `viewer` (read only).
+`x-tenant-id` header still works locally as an owner bootstrap unless `ALLOW_HEADER_AUTH=false`.
 
 ## License
 

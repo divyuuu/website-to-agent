@@ -7,6 +7,8 @@ import {
 } from "@website-to-agent/database";
 import { registerWorkflowRoutes } from "./workflows.js";
 import { registerExecutionRoutes } from "./executions.js";
+import { registerKeyRoutes } from "./keys.js";
+import { redactText } from "@website-to-agent/secrets";
 
 export function buildServer(dbPath?: string) {
   const server = Fastify({ logger: false });
@@ -25,6 +27,12 @@ export function buildServer(dbPath?: string) {
   runMigrations(db);
   registerWorkflowRoutes(server, db);
   registerExecutionRoutes(server, db);
+  registerKeyRoutes(server, db);
+  server.setErrorHandler((error, _req, reply) => {
+    const status = (error as { statusCode?: number }).statusCode ?? 500;
+    const message = error instanceof Error ? error.message : "unknown error";
+    reply.code(status).send({ ok: false, error: redactText(message).slice(0, 300) });
+  });
   server.addHook("onClose", async () => {
     db.close();
   });

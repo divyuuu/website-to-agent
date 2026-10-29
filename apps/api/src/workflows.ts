@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseSync } from "node:sqlite";
@@ -6,19 +6,14 @@ import {
   workflowDefinitionSchema,
   assertTransition,
 } from "@website-to-agent/workflow-engine";
+import {
+  resolveAuth,
+  canPerform,
+  type AuthContext,
+} from "@website-to-agent/auth";
 
-function tenantIdFrom(req: { headers: Record<string, unknown> }): string | null {
-  const raw = req.headers["x-tenant-id"];
-  if (typeof raw !== "string") return null;
-  const id = raw.trim();
-  if (!id || id.length > 64) return null;
-  return id;
-}
-
-function ensureTenant(db: DatabaseSync, tenantId: string): void {
-  db.prepare(
-    "INSERT OR IGNORE INTO tenants (id, name, status) VALUES (?, ?, 'active')"
-  ).run(tenantId, tenantId);
+function authOf(req: FastifyRequest): AuthContext {
+  return (req as unknown as { auth: AuthContext }).auth;
 }
 
 function isAllowedBaseUrl(raw: string): boolean {
@@ -42,19 +37,23 @@ export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): 
     if (
       !req.url.startsWith("/workflows") &&
       !req.url.startsWith("/connections") &&
-      !req.url.startsWith("/executions")
+      !req.url.startsWith("/executions") &&
+      !req.url.startsWith("/mcp-keys")
     )
       return;
-    const tenantId = tenantIdFrom(req);
-    if (!tenantId) {
-      reply.code(401).send({ ok: false, error: "missing x-tenant-id" });
+    const auth = resolveAuth(db, req.headers as Record<string, unknown>);
+    if (!auth) {
+      reply.code(401).send({ ok: false, error: "unauthorized" });
       return;
     }
-    ensureTenant(db, tenantId);
+    (req as unknown as { auth: AuthContext }).auth = auth;
   });
 
   app.post("/connections", async (req, reply) => {
-    const tenantId = tenantIdFrom(req) as string;
+    if (!canPerform(authOf(req).role, "operator")) {
+      return reply.code(403).send({ ok: false, error: "forbidden" });
+    }
+    const tenantId = authOf(req).tenantId;
     const body = req.body as { baseUrl?: string };
     if (!body?.baseUrl || !isAllowedBaseUrl(body.baseUrl)) {
       return reply.code(400).send({ ok: false, error: "baseUrl must be an http localhost URL" });
@@ -67,7 +66,10 @@ export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): 
   });
 
   app.post("/workflows", async (req, reply) => {
-    const tenantId = tenantIdFrom(req) as string;
+    if (!canPerform(authOf(req).role, "operator")) {
+      return reply.code(403).send({ ok: false, error: "forbidden" });
+    }
+    const tenantId = authOf(req).tenantId;
     const body = req.body as { stableName?: string; connectionId?: string };
     const nameParsed = stableNameSchema.safeParse(body?.stableName);
     if (!nameParsed.success) {
@@ -95,7 +97,10 @@ export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): 
   });
 
   app.post("/workflows/:id/propose", async (req, reply) => {
-    const tenantId = tenantIdFrom(req) as string;
+    if (!canPerform(authOf(req).role, "operator")) {
+      return reply.code(403).send({ ok: false, error: "forbidden" });
+    }
+    const tenantId = authOf(req).tenantId;
     const { id } = req.params as { id: string };
     const row = db
       .prepare("SELECT id, stable_name AS stableName, status FROM workflows WHERE id = ? AND tenant_id = ?")
@@ -127,7 +132,10 @@ export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): 
   });
 
   app.post("/workflows/:id/approve", async (req, reply) => {
-    const tenantId = tenantIdFrom(req) as string;
+    if (!canPerform(authOf(req).role, "owner")) {
+      return reply.code(403).send({ ok: false, error: "forbidden" });
+    }
+    const tenantId = authOf(req).tenantId;
     const { id } = req.params as { id: string };
     const row = db
       .prepare("SELECT id, status FROM workflows WHERE id = ? AND tenant_id = ?")
@@ -146,7 +154,10 @@ export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): 
   });
 
   app.post("/workflows/:id/reject", async (req, reply) => {
-    const tenantId = tenantIdFrom(req) as string;
+    if (!canPerform(authOf(req).role, "owner")) {
+      return reply.code(403).send({ ok: false, error: "forbidden" });
+    }
+    const tenantId = authOf(req).tenantId;
     const { id } = req.params as { id: string };
     const row = db
       .prepare("SELECT id, status FROM workflows WHERE id = ? AND tenant_id = ?")
@@ -162,7 +173,7 @@ export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): 
   });
 
   app.get("/workflows", async (req) => {
-    const tenantId = tenantIdFrom(req) as string;
+    const tenantId = authOf(req).tenantId;
     const rows = db
       .prepare("SELECT id, stable_name AS stableName, status FROM workflows WHERE tenant_id = ? ORDER BY stable_name")
       .all(tenantId);
@@ -170,7 +181,7 @@ export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): 
   });
 
   app.get("/workflows/:id", async (req, reply) => {
-    const tenantId = tenantIdFrom(req) as string;
+    const tenantId = authOf(req).tenantId;
     const { id } = req.params as { id: string };
     const row = db
       .prepare("SELECT id, stable_name AS stableName, status FROM workflows WHERE id = ? AND tenant_id = ?")

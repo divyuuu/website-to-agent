@@ -1,9 +1,10 @@
 # Phase 5 — Auth + Tenant Isolation + Audit
 
-Status: NOT_STARTED
-Branch: TBD
-PR: TBD
+Status: DONE
+Branch: feat/phase-5-auth
+PR: TBD (link after merge)
 Author: divyuuu
+Completed: 2026-10-30
 
 ## Objective
 
@@ -40,4 +41,16 @@ Without this, it is a demo, not a product.
 
 ## Memory update on completion
 
-- Status DONE + isolation test evidence.
+- Status DONE + test evidence.
+
+## Evidence (2026-10-30)
+
+- `pnpm lint` 0, `pnpm typecheck` 0, `pnpm test` 0 (15 files, 33 tests)
+- Keys: `w2a_` + 32 hex, SHA-256 stored (plaintext never in DB), create/list/revoke, no hashes in list output
+- Roles: viewer < operator < owner; approve/reject + key mgmt owner-only; writes operator+; reads viewer+
+- MCP server now requires `x-mcp-key`; legacy header -> 401; revoked key -> 401; tenant_b sees zero tenant_a tools
+- Secrets: redactText covers keys, sessions, Authorization, passwords; error handler + execution errors redacted
+- Audit: key.create/key.revoke/workflow.approve/execution.run all appended; no update/delete paths
+- Negative tests: cross-tenant 404s, viewer 403s, revoked 401s, unauthenticated 401s
+- `ALLOW_HEADER_AUTH` gates the local header bootstrap (set false in production)
+- Rollback: revert merge commit of this phase PR
