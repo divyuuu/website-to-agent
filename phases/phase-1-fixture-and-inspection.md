@@ -1,9 +1,10 @@
 # Phase 1 — Fixture Site + Inspection
 
-Status: NOT_STARTED
-Branch: TBD
-PR: TBD
+Status: DONE
+Branch: feat/phase-1-fixture
+PR: TBD (link after merge)
 Author: divyuuu
+Completed: 2026-10-30
 
 ## Objective
 
@@ -27,9 +28,9 @@ Never test against real customer production. Need a stable target to prove inspe
 
 ## Deliverables
 
-- [ ] Fixture site runs via `pnpm fixture:dev`
-- [ ] Inspection JSON contains pages, forms, buttons by role/name, no passwords/cookies
-- [ ] Screenshots/traces on failure only, redacted, git-ignored
+- [x] Fixture site runs via `pnpm fixture:dev`
+- [x] Inspection JSON contains pages, forms, buttons by role/name, no passwords/cookies
+- [x] Screenshots/traces on failure only, redacted, git-ignored
 
 ## Exit criteria
 
@@ -45,3 +46,12 @@ Never test against real customer production. Need a stable target to prove inspe
 ## Memory update on completion
 
 - Status DONE + sample inspection.json path + test evidence.
+
+## Evidence (2026-10-30, Windows, Node v24.18.0)
+
+- `pnpm lint` 0, `pnpm typecheck` 0, `pnpm test` 0 (5 files, 7 tests)
+- Live CLI `pnpm inspect --url http://localhost:4100/` returns login inventory: h1 Demo School Login, textbox username, textbox [redacted] password, button Sign in
+- Blocked-origin tests: https rejected (Only http), http://example.com rejected (Blocked origin)
+- Repeatability test: same URL twice gives same element shape
+- Fix note: evaluate callback moved to IIFE string form to avoid tsx helper leak in browser context
+- Rollback: revert merge commit of this phase PR

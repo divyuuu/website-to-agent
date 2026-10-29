@@ -55,6 +55,22 @@ importers:
 
   packages/database: {}
 
+  packages/inspection:
+    dependencies:
+      playwright:
+        specifier: ^1.49.1
+        version: 1.64.1
+    devDependencies:
+      '@website-to-agent/fixture-site':
+        specifier: workspace:*
+        version: link:../test-fixtures/site
+
+  packages/test-fixtures/site:
+    dependencies:
+      fastify:
+        specifier: ^5.2.0
+        version: 5.12.7
+
 packages:
 
   '@esbuild/aix-ppc64@0.28.2':
@@ -941,6 +957,16 @@ packages:
 
   pino@10.4.0:
     resolution: {integrity: sha512-bk1ZMTwG/Vymx+zPoa28MhNzucFvXJWp3csrSuxuHPSMeUettaCoQ5Jvg07mtC4JGNpcfTwz41oVCnNgBK9+vA==}
+    hasBin: true
+
+  playwright-core@1.64.1:
+    resolution: {integrity: sha512-BC4s8y6SEVA6Q1rSxZTto8hI1KUI3xXlHGZgvGqP4IqPdI/a6FX9H29IDNz7vKo9l21b6LfYosScPL6M3xxyDQ==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  playwright@1.64.1:
+    resolution: {integrity: sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA==}
+    engines: {node: '>=20'}
     hasBin: true
 
   postcss@8.5.32:
@@ -2034,6 +2060,12 @@ snapshots:
       safe-stable-stringify: 2.5.0
       sonic-boom: 4.2.1
       thread-stream: 4.2.0
+
+  playwright-core@1.64.1: {}
+
+  playwright@1.64.1:
+    dependencies:
+      playwright-core: 1.64.1
 
   postcss@8.5.32:
     dependencies:

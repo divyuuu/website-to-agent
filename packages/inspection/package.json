@@ -1,0 +1,16 @@
+{
+  "name": "@website-to-agent/inspection",
+  "version": "0.1.0",
+  "author": "divyuuu",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "inspect": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "playwright": "^1.49.1"
+  },
+  "devDependencies": {
+    "@website-to-agent/fixture-site": "workspace:*"
+  }
+}
