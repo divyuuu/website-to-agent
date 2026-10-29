@@ -39,7 +39,12 @@ const stableNameSchema = z.string().regex(/^[a-z][a-z0-9_]*$/).max(80);
 
 export function registerWorkflowRoutes(app: FastifyInstance, db: DatabaseSync): void {
   app.addHook("preHandler", async (req, reply) => {
-    if (!req.url.startsWith("/workflows") && !req.url.startsWith("/connections")) return;
+    if (
+      !req.url.startsWith("/workflows") &&
+      !req.url.startsWith("/connections") &&
+      !req.url.startsWith("/executions")
+    )
+      return;
     const tenantId = tenantIdFrom(req);
     if (!tenantId) {
       reply.code(401).send({ ok: false, error: "missing x-tenant-id" });

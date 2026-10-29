@@ -6,6 +6,7 @@ import {
   databasePathFromEnv,
 } from "@website-to-agent/database";
 import { registerWorkflowRoutes } from "./workflows.js";
+import { registerExecutionRoutes } from "./executions.js";
 
 export function buildServer(dbPath?: string) {
   const server = Fastify({ logger: false });
@@ -23,6 +24,7 @@ export function buildServer(dbPath?: string) {
   const db = openDatabase(path);
   runMigrations(db);
   registerWorkflowRoutes(server, db);
+  registerExecutionRoutes(server, db);
   server.addHook("onClose", async () => {
     db.close();
   });

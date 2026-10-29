@@ -1,9 +1,10 @@
 # Phase 3 — Execution Engine
 
-Status: NOT_STARTED
-Branch: TBD
-PR: TBD
+Status: DONE
+Branch: feat/phase-3-execution
+PR: TBD (link after merge)
 Author: divyuuu
+Completed: 2026-10-30
 
 ## Objective
 
@@ -39,4 +40,14 @@ Proves the task actually succeeded, not just that Playwright did not throw.
 
 ## Memory update on completion
 
-- Status DONE + execution IDs + success rate evidence.
+- Status DONE + test evidence.
+
+## Evidence (2026-10-30)
+
+- `pnpm lint` 0, `pnpm typecheck` 0, `pnpm test` 0 (10 files, 22 tests)
+- Runner: search STU-001 succeeded with verified rows, unknown student empty rows, changed locator failed, short wait timed_out
+- API: unapproved 409, approved succeeded, idempotencyKey returns same executionId with duplicate:true, status lookup works
+- Migration 002 adds idempotency_key; runMigrations now runs all *.sql sorted
+- Note: execution runs in-process with isolated browser context per run; dedicated worker process deferred (extraction when scaling)
+- Fixture demo login (demo/demo123) used for localhost only; secret store comes in Phase 5
+- Rollback: revert merge commit of this phase PR
