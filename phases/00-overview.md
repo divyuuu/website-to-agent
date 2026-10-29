@@ -24,7 +24,7 @@ Workflow: branch -> commit -> PR -> merge to `main`. No direct pushes to `main`.
 | 1 | Fixture Site + Inspection | Local demo site + Playwright inspection JSON | DONE |
 | 2 | Workflow Schema + Approval | Declarative schema, validation, approve/reject | DONE |
 | 3 | Execution Engine | Run approved read-only workflow + verify outcome | DONE |
-| 4 | MCP Server | Expose 1-2 tools via MCP, call from real MCP client | NOT_STARTED |
+| 4 | MCP Server | Expose 1-2 tools via MCP, call from real MCP client | DONE |
 | 5 | Auth + Tenant Isolation + Audit | Multi-tenant isolation, credentials, audit log | NOT_STARTED |
 | 6 | Hardening + Pilot Ready | Rate limits, redaction, E2E/regression, runbook | NOT_STARTED |
 
@@ -42,7 +42,8 @@ Workflow: branch -> commit -> PR -> merge to `main`. No direct pushes to `main`.
 - Phase 1 DONE on branch `feat/phase-1-fixture` (2026-10-30). Evidence: 5 files/7 tests green, live CLI inspection verified with redaction.
 - Phase 2 DONE on branch `feat/phase-2-workflow` (2026-10-30). Evidence: 8 files/17 tests green, approval flow + cross-tenant isolation verified.
 - Phase 3 DONE on branch `feat/phase-3-execution` (2026-10-30). Evidence: 10 files/22 tests green, verified extraction + idempotency.
-- Next: Phase 4 MCP Server.
+- Phase 4 DONE on branch `feat/phase-4-mcp` (2026-10-30). Evidence: 12 files/27 tests green, real MCP Client list+call verified.
+- Next: Phase 5 Auth + Tenant Isolation.
 
 ## Rollback rule
 

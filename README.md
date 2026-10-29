@@ -31,12 +31,27 @@ SQLite file at `DATABASE_PATH` (default `./data/app.db`). Never committed. Schem
 
 ## Structure
 
-- `apps/api` — Admin REST API, health/readiness
+- `apps/api` — Admin REST API, health/readiness, workflows, executions
+- `apps/mcp-server` — MCP Streamable HTTP endpoint (`POST /mcp`), per-tenant tools
 - `packages/config` — typed env parsing
 - `packages/contracts` — shared Zod schemas
 - `packages/database` — SQLite migrations + tenant-scoped queries
+- `packages/inspection` — Playwright localhost inspection + `pnpm inspect`
+- `packages/workflow-engine` — schema, approval, Playwright runner
+- `packages/tool-registry` — approved workflows mapped to MCP tools
+- `packages/test-fixtures/site` — local demo site (`pnpm fixture:dev`, port 4100)
 - `phases/` — phase-wise build memory, source of truth for progress
 - `infra/` — local container config
+
+## MCP quick check
+
+```sh
+pnpm fixture:dev
+pnpm mcp:dev
+```
+
+Point an MCP client at `http://localhost:3001/mcp` with header `x-tenant-id: <tenant>`.
+Per-tenant API keys arrive in Phase 5; header auth is temporary.
 
 ## License
 

@@ -8,6 +8,7 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "dev": "pnpm --filter ./apps/api dev",
+    "mcp:dev": "pnpm --filter @website-to-agent/mcp-server dev",
     "fixture:dev": "pnpm --filter @website-to-agent/fixture-site dev",
     "inspect": "pnpm --filter @website-to-agent/inspection inspect",
     "test": "vitest run",
