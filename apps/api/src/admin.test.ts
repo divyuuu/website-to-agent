@@ -14,10 +14,9 @@ describe("admin ui", () => {
       expect(res.headers["content-type"]).toMatch(/html/);
       expect(res.body).toContain("website-to-agent");
       expect(res.body).toContain("/workflows");
-
-      const root = await server.inject({ method: "GET", url: "/" });
-      expect(root.statusCode).toBe(302);
-      expect(root.headers.location).toBe("/admin");
+      expect(res.body).toContain("/executions");
+      expect(res.body).toContain("Propose");
+      expect(res.body).toContain("Run it");
     } finally {
       await server.close();
     }
